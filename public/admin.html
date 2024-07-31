@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Hickory BBQ Joint - Admin</title>
+        <link rel="stylesheet" href="styles.css" />
+        <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    </head>
+    <body>
+        <div id="admin-container">
+            <div id="admin-panel">
+                <img src="logo.png" alt="Hickory BBQ Joint Logo" class="logo" />
+                <h2>Admin Panel</h2>
+                <button id="add-order-btn" class="btn btn-primary">
+                    Add New Order
+                </button>
+                <button id="view-analytics-btn" class="btn btn-secondary">
+                    View Analytics
+                </button>
+                <button id="reset-order-number-btn" class="btn btn-danger">
+                    New Shift
+                </button>
+                <div id="fries-container">
+                    <div class="fries-column">
+                        <img
+                            src="fries.png"
+                            alt="Fries Icon"
+                            class="fries-icon"
+                        />
+                        <p id="fries-count">0</p>
+                    </div>
+                    <div class="fries-column">
+                        <img
+                            src="cheesyfries.png"
+                            alt="Cheesy Fries Icon"
+                            class="fries-icon"
+                        />
+                        <p id="cheesy-fries-count">0</p>
+                    </div>
+                </div>
+            </div>
+            <div id="admin-orders-container">
+                <ul id="admin-orders-list" class="order-list"></ul>
+            </div>
+        </div>
+
+        <!-- POS Style Modal -->
+        <div id="pos-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Add New Order</h2>
+                <div class="modal-left">
+                    <div class="menu-categories">
+                        <h3>Sandwiches</h3>
+                        <div class="menu-items">
+                            <button
+                                class="menu-item"
+                                data-item="Pulled Pork"
+                                data-price="9.00"
+                            >
+                                Pulled Pork
+                            </button>
+                            <button
+                                class="menu-item"
+                                data-item="Pulled Beef"
+                                data-price="10.00"
+                            >
+                                Pulled Beef
+                            </button>
+                            <button
+                                class="menu-item"
+                                data-item="Beef Brisket"
+                                data-price="12.00"
+                            >
+                                Beef Brisket
+                            </button>
+                            <button
+                                class="menu-item"
+                                data-item="Pulled Chicken"
+                                data-price="9.00"
+                            >
+                                Pulled Chicken
+                            </button>
+                        </div>
+                        <h3>Burgers</h3>
+                        <div class="menu-items">
+                            <button
+                                class="menu-item"
+                                data-item="Double Smashed Burger"
+                                data-price="10.00"
+                            >
+                                Double Smashed (10€)
+                            </button>
+                            <button
+                                class="menu-item"
+                                data-item="Triple Smashed Burger"
+                                data-price="12.00"
+                            >
+                                Triple Smashed (12€)
+                            </button>
+                            <button
+                                class="menu-item"
+                                data-item="Vegan Burger"
+                                data-price="10.00"
+                            >
+                                Vegan Burger
+                            </button>
+                        </div>
+                        <h3>Fries</h3>
+                        <div class="menu-items">
+                            <button
+                                class="menu-item"
+                                data-item="Fries"
+                                data-price="3.50"
+                            >
+                                Fries
+                            </button>
+                            <button
+                                class="menu-item"
+                                data-item="Cheesy Fries"
+                                data-price="4.50"
+                            >
+                                Cheesy Fries
+                            </button>
+                        </div>
+                        <h3>Custom</h3>
+                        <div class="menu-items">
+                            <button class="menu-item" id="custom-price-btn">
+                                Custom Price
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-right">
+                    <div class="cart">
+                        <h3>Cart</h3>
+                        <ul id="cart-list"></ul>
+                        <p>Total: €<span id="total-price">0.00</span></p>
+                        <div class="form-group">
+                            <label for="eta">ETA (minutes)</label>
+                            <input
+                                type="number"
+                                id="eta"
+                                class="form-control"
+                                required
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label for="payment">Payment Method</label>
+                            <select id="payment" class="form-control" required>
+                                <option value="cash">Cash</option>
+                                <option value="card">Card</option>
+                            </select>
+                        </div>
+                        <button id="place-order-btn" class="btn btn-primary">
+                            Place Order
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add-ons Modal -->
+        <div id="addons-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Select Add-ons</h2>
+                <div id="addons-options">
+                    <!-- Add-ons options will be dynamically populated -->
+                </div>
+                <button id="confirm-addons-btn" class="btn btn-primary">
+                    Confirm
+                </button>
+            </div>
+        </div>
+
+        <!-- Analytics Modal -->
+        <div id="analytics-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Order Analytics</h2>
+                <div id="analytics-content">
+                    <button id="print-pdf-btn" class="btn btn-secondary">
+                        Print PDF
+                    </button>
+                    <canvas id="ordersChart"></canvas>
+                    <canvas id="revenueChart"></canvas>
+                    <canvas id="paymentChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <script src="admin-scripts.js"></script>
+    </body>
+</html>
